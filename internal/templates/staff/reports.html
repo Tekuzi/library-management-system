@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raporty - Panel Personelu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="bg-gray-800 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <a href="/" class="text-2xl font-bold hover:text-gray-300 transition">Biblioteka</a>
+                    <a href="/books" class="hover:text-gray-300 transition">Katalog</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/staff" class="hover:text-gray-300 transition">{{.User.FirstName}} {{.User.LastName}}</a>
+                    <form method="POST" action="/logout" class="inline">
+                        <button type="submit" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded transition">
+                            Wyloguj
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg min-h-screen">
+            <div class="p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Panel Personelu</h2>
+                <nav class="space-y-2">
+                    <a href="/staff" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Dashboard
+                    </a>
+                    <a href="/staff/catalog" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Katalog
+                    </a>
+                    <a href="/staff/loans" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Wypożyczenia
+                    </a>
+                    <a href="/staff/pending-pickups" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Oczekujące odbiory
+                    </a>
+                    <a href="/staff/users" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Użytkownicy
+                    </a>
+                    <a href="/staff/reports" class="block px-4 py-3 bg-gray-200 text-gray-800 rounded-lg font-medium">
+                        Raporty
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-8">Raporty</h1>
+
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Raporty systemu</h2>
+                <p class="text-gray-600">Tutaj będą dostępne raporty statystyczne.</p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

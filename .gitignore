@@ -1,0 +1,40 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/library-management-system
+
+# Test binary
+*.test
+
+# Output
+*.out
+
+# Environment files
+.env
+.env.local
+
+# Firebase credentials
+credentials/
+serviceAccountKey.json
+firebase-credentials.json
+*.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work

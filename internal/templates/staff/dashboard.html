@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Personelu - Biblioteka</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="bg-gray-800 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <a href="/" class="text-2xl font-bold hover:text-gray-300 transition">Biblioteka</a>
+                    <a href="/books" class="hover:text-gray-300 transition">Katalog</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/staff" class="hover:text-gray-300 transition">{{.User.FirstName}} {{.User.LastName}}</a>
+                    <form method="POST" action="/logout" class="inline">
+                        <button type="submit" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded transition">
+                            Wyloguj
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg min-h-screen">
+            <div class="p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Panel Personelu</h2>
+                <nav class="space-y-2">
+                    <a href="/staff" class="block px-4 py-3 bg-gray-200 text-gray-800 rounded-lg font-medium">
+                        Dashboard
+                    </a>
+                    <a href="/staff/catalog" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Katalog
+                    </a>
+                    <a href="/staff/loans" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Wypożyczenia
+                    </a>
+                    <a href="/staff/pending-pickups" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Oczekujące odbiory
+                    </a>
+                    <a href="/staff/users" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Użytkownicy
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-8">Dashboard</h1>
+
+            <!-- Statystyki -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Wszystkie książki -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Wszystkie książki</p>
+                            <p class="text-3xl font-bold text-gray-800">{{.Stats.totalBooks}}</p>
+                        </div>
+                        <div class="bg-gray-200 rounded-full p-3">
+                            <svg class="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aktywne wypożyczenia -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Aktywne wypożyczenia</p>
+                            <p class="text-3xl font-bold text-gray-800">{{.Stats.activeLoans}}</p>
+                        </div>
+                        <div class="bg-green-100 rounded-full p-3">
+                            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Do odbioru -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Do odbioru</p>
+                            <p class="text-3xl font-bold text-gray-800">{{or .Stats.pendingPickups 0}}</p>
+                        </div>
+                        <div class="bg-yellow-100 rounded-full p-3">
+                            <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Zaległe zwroty -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Zaległe zwroty</p>
+                            <p class="text-3xl font-bold text-gray-800">{{or .Stats.overdueLoans 0}}</p>
+                        </div>
+                        <div class="bg-gray-200 rounded-full p-3">
+                            <svg class="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Użytkownicy -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Użytkownicy</p>
+                            <p class="text-3xl font-bold text-gray-800">{{.Stats.totalUsers}}</p>
+                        </div>
+                        <div class="bg-purple-100 rounded-full p-3">
+                            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Szybkie akcje -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <a href="/staff/catalog" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Zarządzaj katalogiem</h3>
+                    <p class="text-gray-600">Dodaj, edytuj lub usuń książki</p>
+                </a>
+
+                <a href="/staff/loans" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Wypożyczenia</h3>
+                    <p class="text-gray-600">Zarządzaj wypożyczeniami i zwrotami</p>
+                </a>
+
+                <a href="/staff/users" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Użytkownicy</h3>
+                    <p class="text-gray-600">Przeglądaj konta użytkowników</p>
+                </a>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

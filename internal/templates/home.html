@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteka - Katalog książek</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <nav class="bg-gray-800 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <a href="/" class="text-2xl font-bold hover:text-gray-300 transition">Biblioteka</a>
+                    <a href="/books" class="hover:text-gray-300 transition">Katalog</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    {{if .IsLoggedIn}}
+                        <a href="{{if .IsAdmin}}/staff{{else}}/user{{end}}" class="hover:text-gray-300 transition">{{.User.FirstName}} {{.User.LastName}}</a>
+                        <form method="POST" action="/logout" class="inline">
+                            <button type="submit" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded transition">
+                                Wyloguj
+                            </button>
+                        </form>
+                    {{else}}
+                        <a href="/login" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded transition">Logowanie</a>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        <div class="container mx-auto px-4 py-16">
+            <div class="max-w-4xl mx-auto text-center mb-12">
+                <h1 class="text-4xl font-bold text-gray-800 mb-4">Witamy w katalogu biblioteki</h1>
+                <p class="text-xl text-gray-600 mb-8">Wyszukaj interesujące Cię książki</p>
+            </div>
+
+            <!-- Wyszukiwarka -->
+            <div class="max-w-4xl mx-auto">
+                <form action="/books" method="GET" class="bg-white rounded-lg shadow-md p-8 mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <!-- Tytuł -->
+                        <div>
+                            <label for="title" class="block text-gray-700 font-medium mb-2">Tytuł</label>
+                            <input type="text" id="title" name="title" value="{{.Search.Title}}"
+                                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                placeholder="Wpisz tytuł książki">
+                        </div>
+
+                        <!-- Autor -->
+                        <div>
+                            <label for="author" class="block text-gray-700 font-medium mb-2">Autor</label>
+                            <input type="text" id="author" name="author" value="{{.Search.Author}}"
+                                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                placeholder="Wpisz imię i nazwisko autora">
+                        </div>
+
+                        <!-- ISBN -->
+                        <div>
+                            <label for="isbn" class="block text-gray-700 font-medium mb-2">ISBN</label>
+                            <input type="text" id="isbn" name="isbn" value="{{.Search.ISBN}}"
+                                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                placeholder="978-XX-XXXXX-XX-X">
+                        </div>
+
+                        <!-- Kategoria -->
+                        <div>
+                            <label for="category" class="block text-gray-700 font-medium mb-2">Kategoria</label>
+                            <input type="text" id="category" name="category" value="{{.Search.Category}}"
+                                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                placeholder="np. Fantastyka, Kryminał">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <button type="submit" class="flex-1 bg-gray-700 text-white py-3 rounded-lg hover:bg-gray-600 transition font-medium">
+                            Szukaj książek
+                        </button>
+                        <a href="/" class="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
+                            Wyczyść
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

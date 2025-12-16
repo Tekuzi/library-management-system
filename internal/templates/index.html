@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Zarządzania Biblioteką</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="bg-gray-800 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-2xl font-bold">Biblioteka</h1>
+                    <a href="/" class="hover:text-gray-300 transition">Strona główna</a>
+                    <a href="/books" class="hover:text-gray-300 transition">Katalog</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    {{if .IsLoggedIn}}
+                        {{if .IsAdmin}}
+                        <a href="/staff" class="hover:text-gray-300 transition">Panel Pracownika</a>
+                        {{else}}
+                        <a href="/user" class="hover:text-gray-300 transition">{{.User.FirstName}} {{.User.LastName}}</a>
+                        {{end}}
+                        <span class="text-gray-300">{{.User.FirstName}} {{.User.LastName}}</span>
+                        <form method="POST" action="/logout" class="inline">
+                            <button type="submit" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded transition">
+                                Wyloguj
+                            </button>
+                        </form>
+                    {{else}}
+                        <a href="/login" class="hover:text-gray-300 transition">Logowanie</a>
+                        <a href="/register" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded transition">Rejestracja</a>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="container mx-auto px-4 py-16">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">Witamy w systemie do przeglądania katalogów</h2>
+            <p class="text-lg text-gray-600 mb-8">
+                Przeglądaj dostępne książki, zarządzaj wypożyczeniami i rezerwacjami w jednym miejscu.
+            </p>
+            <div class="flex space-x-4">
+                <a href="/books" class="px-6 py-3 bg-gray-700 text-white rounded hover:bg-gray-600 transition">
+                    Zobacz katalog
+                </a>
+                <a href="/register" class="px-6 py-3 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition">
+                    Załóż konto
+                </a>
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="grid md:grid-cols-3 gap-6 mt-12 max-w-5xl mx-auto">
+            <div class="bg-white p-6 rounded shadow">
+                <h3 class="text-lg font-semibold mb-2">Wyszukiwanie</h3>
+                <p class="text-gray-600 text-sm">
+                    Szybko znajdź interesujące Cię książki po tytule lub autorze
+                </p>
+            </div>
+            <div class="bg-white p-6 rounded shadow">
+                <h3 class="text-lg font-semibold mb-2">Rezerwacje</h3>
+                <p class="text-gray-600 text-sm">
+                    Zarezerwuj książkę i odbierz ją kiedy będzie dostępna
+                </p>
+            </div>
+            <div class="bg-white p-6 rounded shadow">
+                <h3 class="text-lg font-semibold mb-2">Historia wypożyczeń</h3>
+                <p class="text-gray-600 text-sm">
+                    Sprawdź swoje aktualne wypożyczenia i daty zwrotu
+                </p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

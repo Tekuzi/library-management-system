@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historia wypożyczeń - Biblioteka</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="bg-gray-800 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <a href="/" class="text-2xl font-bold hover:text-gray-300 transition">Biblioteka</a>
+                    <a href="/books" class="hover:text-gray-300 transition">Katalog</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/user" class="hover:text-gray-300 transition">{{.User.FirstName}} {{.User.LastName}}</a>
+                    <form method="POST" action="/logout" class="inline">
+                        <button type="submit" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded transition">
+                            Wyloguj
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg min-h-screen">
+            <div class="p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Moje konto</h2>
+                <nav class="space-y-2">
+                    <a href="/user" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Moje wypożyczenia
+                    </a>
+                    <a href="/user/history" class="block px-4 py-3 bg-gray-200 text-gray-800 rounded-lg font-medium">
+                        Historia
+                    </a>
+                    <a href="/user/reservations" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Rezerwacje
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-8">Historia wypożyczeń</h1>
+
+            {{if .History}}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Książka</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data wypożyczenia</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data zwrotu</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {{range .History}}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <div class="font-medium text-gray-900">{{.BookTitle}}</div>
+                                    <div class="text-sm text-gray-500">{{.BookAuthor}}</div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-700">{{.LoanDate.Format "02.01.2006"}}</td>
+                                <td class="px-6 py-4 text-sm text-gray-700">
+                                    {{if .ReturnDate}}
+                                        {{.ReturnDate.Format "02.01.2006"}}
+                                    {{else}}
+                                        -
+                                    {{end}}
+                                </td>
+                                <td class="px-6 py-4">
+                                    {{if .WasOverdue}}
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-300 text-gray-800">
+                                        Zaległe
+                                    </span>
+                                    {{else}}
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                                        Na czas
+                                    </span>
+                                    {{end}}
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {{else}}
+            <div class="bg-white rounded-lg shadow-md p-12 text-center">
+                <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Brak historii</h3>
+                <p class="text-gray-600">Nie masz jeszcze żadnych wypożyczeń</p>
+            </div>
+            {{end}}
+        </main>
+    </div>
+</body>
+</html>

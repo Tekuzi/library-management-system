@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moje konto - Biblioteka</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="bg-gray-800 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <a href="/" class="text-2xl font-bold hover:text-gray-300 transition">Biblioteka</a>
+                    <a href="/books" class="hover:text-gray-300 transition">Katalog</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/user" class="hover:text-gray-300 transition">{{.User.FirstName}} {{.User.LastName}}</a>
+                    <form method="POST" action="/logout" class="inline">
+                        <button type="submit" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded transition">
+                            Wyloguj
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg min-h-screen">
+            <div class="p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Moje konto</h2>
+                <nav class="space-y-2">
+                    <a href="/user" class="block px-4 py-3 bg-gray-200 text-gray-800 rounded-lg font-medium">
+                        Moje wypożyczenia
+                    </a>
+                    <a href="/user/history" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Historia
+                    </a>
+                    <a href="/user/reservations" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Rezerwacje
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-8">Moje wypożyczenia</h1>
+
+            <!-- Aktywne wypożyczenia -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+                <div class="bg-gray-50 px-6 py-4 border-b">
+                    <h2 class="text-xl font-bold text-gray-800">Wypożyczenia</h2>
+                </div>
+                <div class="p-6">
+                    {{if .ActiveLoans}}
+                    <div class="space-y-4">
+                        {{range .ActiveLoans}}
+                        <div class="flex items-center justify-between p-4 border rounded-lg {{if eq .Status "pending_pickup"}}bg-yellow-50 border-yellow-200{{end}}">
+                            <div class="flex-1">
+                                <h3 class="font-bold text-gray-800">{{.BookTitle}}</h3>
+                                <p class="text-sm text-gray-600">{{.BookAuthor}}</p>
+                                <p class="text-sm text-gray-500 mt-1">Data zamówienia: {{.LoanDate.Format "02.01.2006"}}</p>
+                                
+                                {{if eq .Status "pending_pickup"}}
+                                <div class="mt-3 p-3 bg-yellow-100 border border-yellow-300 rounded">
+                                    <p class="text-sm font-medium text-yellow-800">Status: Oczekuje na odbiór</p>
+                                    <p class="text-xs text-yellow-700 mt-1">Podaj ten kod w bibliotece:</p>
+                                    <p class="text-2xl font-bold text-yellow-900 mt-1 tracking-wider">{{.PickupCode}}</p>
+                                </div>
+                                {{end}}
+                            </div>
+                            <div class="text-right">
+                                {{if eq .Status "active"}}
+                                <span class="inline-block px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded mb-2">Aktywne</span>
+                                <p class="text-sm font-medium text-gray-700">Termin zwrotu:</p>
+                                <p class="text-lg font-bold {{if .IsOverdue}}text-gray-700{{else}}text-green-600{{end}}">
+                                    {{.DueDate.Format "02.01.2006"}}
+                                </p>
+                                {{else if eq .Status "pending_pickup"}}
+                                <span class="inline-block px-3 py-1 bg-yellow-200 text-yellow-800 text-sm font-medium rounded">Czeka na odbiór</span>
+                                {{end}}
+                            </div>
+                        </div>
+                        {{end}}
+                    </div>
+                    {{else}}
+                    <p class="text-gray-500 text-center py-8">Nie masz aktywnych wypożyczeń</p>
+                    {{end}}
+                </div>
+            </div>
+
+            <!-- Podsumowanie -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <p class="text-gray-500 text-sm">Aktywne wypożyczenia</p>
+                    <p class="text-3xl font-bold text-gray-800">{{.Stats.currentLoans}} / {{.Stats.maxLoans}}</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <p class="text-gray-500 text-sm">Aktywne rezerwacje</p>
+                    <p class="text-3xl font-bold text-gray-800">{{.Stats.activeReservations}}</p>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

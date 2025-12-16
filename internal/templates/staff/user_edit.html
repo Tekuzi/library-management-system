@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edytuj użytkownika - Panel Personelu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="bg-gray-800 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <a href="/" class="text-2xl font-bold hover:text-gray-300 transition">Biblioteka</a>
+                    <a href="/books" class="hover:text-gray-300 transition">Katalog</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/staff" class="hover:text-gray-300 transition">{{.User.FirstName}} {{.User.LastName}}</a>
+                    <form method="POST" action="/logout" class="inline">
+                        <button type="submit" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded transition">
+                            Wyloguj
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg min-h-screen">
+            <div class="p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Panel Personelu</h2>
+                <nav class="space-y-2">
+                    <a href="/staff" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Dashboard
+                    </a>
+                    <a href="/staff/catalog" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Katalog
+                    </a>
+                    <a href="/staff/loans" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Wypożyczenia
+                    </a>
+                    <a href="/staff/pending-pickups" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Oczekujące odbiory
+                    </a>
+                    <a href="/staff/users" class="block px-4 py-3 bg-gray-200 text-gray-800 rounded-lg font-medium">
+                        Użytkownicy
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8">
+            <div class="mb-6">
+                <a href="/staff/users" class="text-gray-700 hover:text-gray-900">← Powrót do listy użytkowników</a>
+            </div>
+
+            <h1 class="text-3xl font-bold text-gray-800 mb-8">Edytuj użytkownika</h1>
+
+            {{if .Error}}
+            <div class="bg-gray-100 border border-gray-400 text-gray-700 px-4 py-3 rounded mb-6">
+                {{.Error}}
+            </div>
+            {{end}}
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <form method="POST" action="/staff/users/{{.EditUser.ID}}/update">
+                    <div class="grid grid-cols-2 gap-6">
+                        <!-- Informacje podstawowe -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Imię</label>
+                            <input type="text" name="first_name" value="{{.EditUser.FirstName}}" readonly
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nazwisko</label>
+                            <input type="text" name="last_name" value="{{.EditUser.LastName}}" readonly
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input type="email" name="email" value="{{.EditUser.Email}}" readonly
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Telefon</label>
+                            <input type="text" name="phone" value="{{.EditUser.Phone}}" readonly
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed">
+                        </div>
+
+                        <!-- Edytowalne pola -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Maksymalna liczba wypożyczeń*</label>
+                            <input type="number" name="max_loans" value="{{.EditUser.MaxLoans}}" min="1" max="20" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent">
+                            <p class="text-xs text-gray-500 mt-1">Obecnie: {{.EditUser.CurrentLoans}} aktywnych wypożyczeń</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Status*</label>
+                            <select name="is_active" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent">
+                                <option value="true" {{if .EditUser.IsActive}}selected{{end}}>Aktywny</option>
+                                <option value="false" {{if not .EditUser.IsActive}}selected{{end}}>Nieaktywny</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Rola</label>
+                            <input type="text" value="{{if eq .EditUser.Role "admin"}}Administrator{{else}}Czytelnik{{end}}" readonly
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed">
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end space-x-4">
+                        <a href="/staff/users" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                            Anuluj
+                        </a>
+                        <button type="submit" class="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600">
+                            Zapisz zmiany
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wypożyczenia - Panel Personelu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="bg-gray-800 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <a href="/" class="text-2xl font-bold hover:text-gray-300 transition">Biblioteka</a>
+                    <a href="/books" class="hover:text-gray-300 transition">Katalog</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/staff" class="hover:text-gray-300 transition">{{.User.FirstName}} {{.User.LastName}}</a>
+                    <form method="POST" action="/logout" class="inline">
+                        <button type="submit" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded transition">
+                            Wyloguj
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg min-h-screen">
+            <div class="p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Panel Personelu</h2>
+                <nav class="space-y-2">
+                    <a href="/staff" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Dashboard
+                    </a>
+                    <a href="/staff/catalog" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Katalog
+                    </a>
+                    <a href="/staff/loans" class="block px-4 py-3 bg-gray-200 text-gray-800 rounded-lg font-medium">
+                        Wypożyczenia
+                    </a>
+                    <a href="/staff/pending-pickups" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Oczekujące odbiory
+                    </a>
+                    <a href="/staff/users" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Użytkownicy
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800">Zarządzanie wypożyczeniami</h1>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="bg-white rounded-lg shadow-md mb-6">
+                <div class="border-b border-gray-200">
+                    <nav class="flex -mb-px">
+                        <a href="/staff/loans?filter=all" 
+                           class="px-6 py-4 text-sm font-medium {{if or (not .Filter) (eq .Filter "all")}}border-b-2 border-blue-500 text-gray-700{{else}}text-gray-500 hover:text-gray-700 hover:border-gray-300{{end}}">
+                            Wszystkie
+                        </a>
+                        <a href="/staff/loans?filter=active" 
+                           class="px-6 py-4 text-sm font-medium {{if eq .Filter "active"}}border-b-2 border-blue-500 text-gray-700{{else}}text-gray-500 hover:text-gray-700 hover:border-gray-300{{end}}">
+                            Aktywne
+                        </a>
+                        <a href="/staff/loans?filter=overdue" 
+                           class="px-6 py-4 text-sm font-medium {{if eq .Filter "overdue"}}border-b-2 border-blue-500 text-gray-700{{else}}text-gray-500 hover:text-gray-700 hover:border-gray-300{{end}}">
+                            Przeterminowane
+                        </a>
+                        <a href="/staff/loans?filter=returned" 
+                           class="px-6 py-4 text-sm font-medium {{if eq .Filter "returned"}}border-b-2 border-blue-500 text-gray-700{{else}}text-gray-500 hover:text-gray-700 hover:border-gray-300{{end}}">
+                            Zwrócone
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Loans Table -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                {{if .Error}}
+                    <div class="p-6 text-center text-gray-700">
+                        <p>{{.Error}}</p>
+                    </div>
+                {{else if .Loans}}
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Książka</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Wypożyczający</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data wypożyczenia</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Termin zwrotu</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {{range .Loans}}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <div class="text-sm font-medium text-gray-900">{{.BookTitle}}</div>
+                                    <div class="text-sm text-gray-500">{{.BookAuthor}}</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900">{{.UserName}}</div>
+                                    <div class="text-sm text-gray-500">{{.UserEmail}}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{.LoanDate.Format "2006-01-02"}}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm {{if .IsOverdue}}text-gray-700 font-semibold{{else}}text-gray-900{{end}}">
+                                        {{.DueDate.Format "2006-01-02"}}
+                                        {{if .IsOverdue}}
+                                        <span class="text-xs">({{.DaysOverdue}} dni)</span>
+                                        {{end}}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{if eq .Status "returned"}}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        Zwrócona
+                                    </span>
+                                    {{else if .IsOverdue}}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-300 text-gray-800">
+                                        Przeterminowana
+                                    </span>
+                                    {{else}}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-300 text-gray-800">
+                                        Aktywna
+                                    </span>
+                                    {{end}}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    {{if eq .Status "active"}}
+                                    <button 
+                                        hx-post="/staff/loans/{{.ID}}/return"
+                                        hx-confirm="Czy na pewno chcesz oznaczyć tę książkę jako zwróconą?"
+                                        hx-swap="outerHTML"
+                                        hx-target="closest tr"
+                                        class="text-green-600 hover:text-green-900">
+                                        Zwrot
+                                    </button>
+                                    {{else if .ReturnDate}}
+                                    <div class="text-sm text-gray-500">{{.ReturnDate.Format "2006-01-02"}}</div>
+                                    {{end}}
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                {{else}}
+                    <div class="p-6 text-center text-gray-500">
+                        <p>Brak wypożyczeń do wyświetlenia.</p>
+                    </div>
+                {{end}}
+            </div>
+        </main>
+    </div>
+</body>
+</html>

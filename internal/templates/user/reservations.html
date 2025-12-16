@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rezerwacje - Biblioteka</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="bg-gray-800 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <a href="/" class="text-2xl font-bold hover:text-gray-300 transition">Biblioteka</a>
+                    <a href="/books" class="hover:text-gray-300 transition">Katalog</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/user" class="hover:text-gray-300 transition">{{.User.FirstName}} {{.User.LastName}}</a>
+                    <form method="POST" action="/logout" class="inline">
+                        <button type="submit" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded transition">
+                            Wyloguj
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg min-h-screen">
+            <div class="p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Moje konto</h2>
+                <nav class="space-y-2">
+                    <a href="/user" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Moje wypożyczenia
+                    </a>
+                    <a href="/user/history" class="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Historia
+                    </a>
+                    <a href="/user/reservations" class="block px-4 py-3 bg-gray-200 text-gray-800 rounded-lg font-medium">
+                        Rezerwacje
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-8">Moje rezerwacje</h1>
+
+            {{if .Reservations}}
+            <div class="space-y-4">
+                {{range .Reservations}}
+                <div class="bg-white rounded-lg shadow-md p-6" id="reservation-{{.ID}}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-800">{{.BookTitle}}</h3>
+                            <p class="text-gray-600 mb-2">Data rezerwacji: {{.ReservationDate.Format "02.01.2006"}}</p>
+                            {{if eq .Status "ready"}}
+                            <p class="text-sm text-gray-500">
+                                Książka czeka na odbiór do: <strong>{{.ExpiryDate.Format "02.01.2006"}}</strong>
+                            </p>
+                            {{else if eq .Status "pending"}}
+                            <p class="text-sm text-gray-500">
+                                {{if .QueuePosition}}Pozycja w kolejce: {{.QueuePosition}}{{end}}
+                            </p>
+                            {{end}}
+                        </div>
+                        <div class="text-right space-y-2">
+                            {{if eq .Status "ready"}}
+                            <div class="mb-2">
+                                <span class="px-4 py-2 bg-green-100 text-green-800 rounded-lg font-medium">
+                                    Gotowa do odbioru
+                                </span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button 
+                                    hx-post="/user/reservations/{{.ID}}/borrow" 
+                                    hx-target="#reservation-{{.ID}}"
+                                    hx-swap="outerHTML"
+                                    hx-confirm="Czy na pewno chcesz wypożyczyć tę książkę?"
+                                    class="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition">
+                                    Wypożycz
+                                </button>
+                                <button 
+                                    hx-post="/user/reservations/{{.ID}}/cancel" 
+                                    hx-target="#reservation-{{.ID}}"
+                                    hx-swap="outerHTML"
+                                    hx-confirm="Czy na pewno chcesz zrezygnować z tej rezerwacji?"
+                                    class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500 transition">
+                                    Rezygnuj
+                                </button>
+                            </div>
+                            {{else if eq .Status "pending"}}
+                            <div class="mb-2">
+                                <span class="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg font-medium">
+                                    Oczekuje
+                                </span>
+                            </div>
+                            <button 
+                                hx-post="/user/reservations/{{.ID}}/cancel" 
+                                hx-target="#reservation-{{.ID}}"
+                                hx-swap="outerHTML"
+                                hx-confirm="Czy na pewno chcesz anulować tę rezerwację?"
+                                class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
+                                Anuluj
+                            </button>
+                            {{else}}
+                            <span class="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg font-medium">
+                                {{.Status}}
+                            </span>
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+            {{else}}
+            <div class="bg-white rounded-lg shadow-md p-12 text-center">
+                <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                </svg>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Brak rezerwacji</h3>
+                <p class="text-gray-600 mb-4">Nie masz aktywnych rezerwacji</p>
+                <a href="/books" class="inline-block px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition">
+                    Przeglądaj katalog
+                </a>
+            </div>
+            {{end}}
+        </main>
+    </div>
+</body>
+</html>

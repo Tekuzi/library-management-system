@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katalog - Biblioteka</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <nav class="bg-gray-800 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <a href="/" class="text-2xl font-bold hover:text-gray-300 transition">Biblioteka</a>
+                    <a href="/books" class="hover:text-gray-300 transition">Katalog</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    {{if .IsLoggedIn}}
+                        <a href="{{if .IsAdmin}}/staff{{else}}/user{{end}}" class="hover:text-gray-300 transition">{{.User.FirstName}} {{.User.LastName}}</a>
+                        <form method="POST" action="/logout" class="inline">
+                            <button type="submit" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded transition">
+                                Wyloguj
+                            </button>
+                        </form>
+                    {{else}}
+                        <a href="/login" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded transition">Logowanie</a>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        <div class="container mx-auto px-4 py-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">Katalog książek</h2>
+
+            <!-- Wyszukiwarka -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <!-- Proste wyszukiwanie -->
+                <form action="/books" method="GET" id="searchForm">
+                    <div class="flex gap-4">
+                        <input 
+                            type="text" 
+                            name="search" 
+                            value="{{.SearchQuery}}"
+                            placeholder="Wyszukaj po tytule, autorze, ISBN lub kategorii..."
+                            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
+                        />
+                        <button 
+                            type="submit"
+                            class="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition font-medium"
+                        >
+                            Szukaj
+                        </button>
+                        <button 
+                            type="button"
+                            onclick="toggleAdvanced()"
+                            class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium"
+                        >
+                            Zaawansowane
+                        </button>
+                    </div>
+
+                    <!-- Zaawansowane wyszukiwanie (ukryte domyślnie) -->
+                    <div id="advancedSearch" class="hidden mt-6 pt-6 border-t">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="title" class="block text-gray-700 font-medium mb-2">Tytuł</label>
+                                <input 
+                                    type="text" 
+                                    id="title" 
+                                    name="title" 
+                                    value="{{.Search.Title}}"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                    placeholder="Wpisz tytuł książki"
+                                />
+                            </div>
+
+                            <div>
+                                <label for="author" class="block text-gray-700 font-medium mb-2">Autor</label>
+                                <input 
+                                    type="text" 
+                                    id="author" 
+                                    name="author" 
+                                    value="{{.Search.Author}}"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                    placeholder="Wpisz imię i nazwisko autora"
+                                />
+                            </div>
+
+                            <div>
+                                <label for="isbn" class="block text-gray-700 font-medium mb-2">ISBN</label>
+                                <input 
+                                    type="text" 
+                                    id="isbn" 
+                                    name="isbn" 
+                                    value="{{.Search.ISBN}}"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                    placeholder="978-XX-XXXXX-XX-X"
+                                />
+                            </div>
+
+                            <div>
+                                <label for="category" class="block text-gray-700 font-medium mb-2">Kategoria</label>
+                                <input 
+                                    type="text" 
+                                    id="category" 
+                                    name="category" 
+                                    value="{{.Search.Category}}"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                    placeholder="np. Fantastyka, Kryminał"
+                                />
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-4 mt-4">
+                            <button 
+                                type="submit"
+                                class="flex-1 bg-gray-700 text-white py-2 rounded-lg hover:bg-gray-600 transition font-medium"
+                            >
+                                Szukaj zaawansowane
+                            </button>
+                            <a 
+                                href="/books"
+                                class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition text-center"
+                            >
+                                Wyczyść
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <script>
+                function toggleAdvanced() {
+                    const advancedDiv = document.getElementById('advancedSearch');
+                    const searchInput = document.querySelector('input[name="search"]');
+                    
+                    if (advancedDiv.classList.contains('hidden')) {
+                        advancedDiv.classList.remove('hidden');
+                        searchInput.disabled = true;
+                        searchInput.classList.add('bg-gray-100');
+                    } else {
+                        advancedDiv.classList.add('hidden');
+                        searchInput.disabled = false;
+                        searchInput.classList.remove('bg-gray-100');
+                    }
+                }
+
+                // Jeśli są parametry zaawansowane, pokaż formularz
+                window.addEventListener('DOMContentLoaded', function() {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.get('title') || urlParams.get('author') || urlParams.get('isbn') || urlParams.get('category')) {
+                        toggleAdvanced();
+                    }
+                });
+            </script>
+
+            {{if .Error}}
+            <div class="bg-gray-100 border border-gray-400 text-gray-700 px-4 py-3 rounded mb-6">
+                {{.Error}}
+            </div>
+            {{end}}
+
+            <!-- Wyniki -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {{range .Books}}
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">{{.Title}}</h3>
+                        <p class="text-gray-600 mb-4">{{.Author}}</p>
+                        
+                        <div class="space-y-2 mb-4">
+                            <p class="text-sm text-gray-500">ISBN: {{.ISBN}}</p>
+                            <p class="text-sm text-gray-500">Wydawnictwo: {{.Publisher}}</p>
+                            {{if .Category}}
+                            <p class="text-sm text-gray-500">Kategoria: {{.Category}}</p>
+                            {{end}}
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            {{if .IsAvailable}}
+                            <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                                Dostępna ({{.AvailableCopies}})
+                            </span>
+                            {{else}}
+                            <span class="px-3 py-1 bg-gray-300 text-gray-800 rounded-full text-sm font-medium">
+                                Wypożyczona
+                            </span>
+                            {{end}}
+
+                            <a href="/books/{{.ID}}" class="text-gray-700 hover:text-gray-900 font-medium">
+                                Szczegóły →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {{else}}
+                <div class="col-span-full text-center py-12">
+                    <p class="text-gray-500 text-lg">Nie znaleziono książek spełniających kryteria.</p>
+                    <a href="/" class="text-gray-700 hover:text-gray-900 mt-4 inline-block">← Powrót do wyszukiwarki</a>
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
