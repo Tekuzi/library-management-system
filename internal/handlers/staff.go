@@ -569,28 +569,43 @@ func (h *StaffHandler) ShowPendingPickups(w http.ResponseWriter, r *http.Request
 func (h *StaffHandler) ConfirmPickup(w http.ResponseWriter, r *http.Request) {
 	session := middleware.GetSessionFromContext(r.Context())
 	if session == nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">Musisz być zalogowany</div>`))
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
-		http.Redirect(w, r, "/staff/pending-pickups?error="+url.QueryEscape("Błąd przetwarzania formularza"), http.StatusSeeOther)
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">Błąd przetwarzania formularza</div>`))
 		return
 	}
 
 	pickupCode := strings.ToUpper(strings.TrimSpace(r.FormValue("pickup_code")))
 	if pickupCode == "" {
-		http.Redirect(w, r, "/staff/pending-pickups?error="+url.QueryEscape("Kod odbioru nie może być pusty"), http.StatusSeeOther)
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">Kod odbioru nie może być pusty</div>`))
 		return
 	}
 
 	// Potwierdź odbiór
 	if err := h.fbClient.ConfirmPickup(pickupCode); err != nil {
 		log.Printf("Błąd potwierdzania odbioru: %v", err)
-		http.Redirect(w, r, "/staff/pending-pickups?error="+url.QueryEscape(err.Error()), http.StatusSeeOther)
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">` + err.Error() + `</div>`))
 		return
 	}
 
 	log.Printf("Pracownik %s potwierdził odbiór z kodem %s", session.User.Email, pickupCode)
-	http.Redirect(w, r, "/staff/pending-pickups?success="+url.QueryEscape("Odbiór potwierdzony pomyślnie"), http.StatusSeeOther)
+	
+	// Zwróć komunikat sukcesu i odśwież listę
+	w.Header().Set("Content-Type", "text/html")
+	w.Header().Set("HX-Trigger", "reload-pickups")
+	w.Write([]byte(`<div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+		✓ Odbiór potwierdzony pomyślnie! Kod: ` + pickupCode + `
+		<script>
+			document.getElementById('pickup_code').value = '';
+			document.getElementById('pickup_code').focus();
+			setTimeout(() => window.location.reload(), 1500);
+		</script>
+	</div>`))
 }
