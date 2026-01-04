@@ -74,20 +74,16 @@ func (h *AuthHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Weryfikacja przez Firebase Admin SDK nie obsługuje bezpośrednio hasła
-	// W prawdziwej aplikacji powinieneś użyć Firebase Client SDK po stronie frontendu
-	// lub zaimplementować własny mechanizm sesji
-
-	// Na potrzeby demonstracji sprawdzamy tylko czy użytkownik istnieje w Firestore
-	user, err := firebase.GlobalClient.Auth.GetUserByEmail(r.Context(), email)
+	// Weryfikuj email i hasło przez Firebase Authentication REST API
+	firebaseUID, err := firebase.GlobalClient.VerifyPassword(email, password)
 	if err != nil {
-		log.Printf("Błąd logowania: %v", err)
-		h.renderLoginError(w, "Nieprawidłowy email lub hasło")
+		log.Printf("Błąd weryfikacji hasła: %v", err)
+		h.renderLoginError(w, err.Error())
 		return
 	}
 
-	// Sprawdź czy użytkownik istnieje w Firestore
-	dbUser, err := firebase.GlobalClient.GetUserByFirebaseUID(user.UID)
+	// Pobierz użytkownika z Firestore po Firebase UID
+	dbUser, err := firebase.GlobalClient.GetUserByFirebaseUID(firebaseUID)
 	if err != nil {
 		log.Printf("Użytkownik nie znaleziony w bazie: %v", err)
 		h.renderLoginError(w, "Użytkownik nie istnieje w systemie")

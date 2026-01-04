@@ -4,7 +4,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -596,7 +595,7 @@ func (h *StaffHandler) ConfirmPickup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("Pracownik %s potwierdził odbiór z kodem %s", session.User.Email, pickupCode)
-	
+
 	// Zwróć komunikat sukcesu i odśwież listę
 	w.Header().Set("Content-Type", "text/html")
 	w.Header().Set("HX-Trigger", "reload-pickups")
